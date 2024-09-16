@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Weather App</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Orbitron"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link rel="stylesheet" href="uikit.css" />
+    <script src="uikit.js"></script>
+    <script src="uikit-icons.js"></script>
+    <style>
+      .digitalStyle {
+        font-family: "Orbitron", sans-serif;
+      }
+
+      html {
+        background-color: #f1f1f1;
+      }
+
+      .small {
+        font-size: 10px;
+      }
+
+      #degree {
+        padding-left: 150px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <span>
+      <span class="uk-search uk-search-default uk-margin-top uk-margin-left">
+        <span uk-search-icon></span>
+        <input
+          type="city"
+          class="uk-search-input"
+          placeholder="City..."
+          value=""
+          id="cityInput"
+          onkeypress="keyPress(event)"
+          onclick="resetStart()"
+        />
+      </span>
+      <button
+        class="uk-button uk-button-secondary"
+        id=""
+        onclick="loadWeather()"
+      >
+        GO!
+      </button>
+      <button
+        class="uk-button uk-button-secondary"
+        id="previous"
+        onclick="previousPage()"
+      ></button>
+      <button
+        class="uk-button uk-button-secondary"
+        id="next"
+        onclick="nextPage()"
+      ></button
+      ><!--&g/l t-->
+    </span>
+    <span class="uk-margin-top">
+      <span class="digitalStyle uk-margin-left" id="showDay"></span>
+      <span class="digitalStyle uk-margin-left" id="showDate"></span>
+      <span class="digitalStyle uk-margin-left" id="showTime"></span>
+      <span class="digitalStyle uk-margin-left" id="loading"></span>
+    </span>
+    <div class="uk-container uk-margin">
+      <div
+        id="degree"
+        class="uk-child-width-1-5@l uk-child-width-1-4@m uk-child-width-1-2@s uk-grid-small uk-grid-match"
+        uk-grid
+      ></div>
+      <div id="warning"></div>
+    </div>
+
+    <script>
+      var start = 0;
+
+      window.addEventListener("load", printDay);
+      window.addEventListener("load", getCurrentTime);
+      window.addEventListener("load", refreshClock);
+      window.addEventListener("load", printDate);
+      window.addEventListener("load", appendBackAndNextIcons);
+
+      function appendBackAndNextIcons() {
+        var prevButton = document.getElementById("previous");
+        var prevImage = document.createElement("img");
+        prevImage.src = "back.png";
+        prevImage.width = 20;
+        prevImage.height = 20;
+        prevImage.style.paddingBottom = "3px";
+        prevButton.appendChild(prevImage);
+
+        var nextButton = document.getElementById("next");
+        var nextImage = document.createElement("img");
+        nextImage.src = "next.png";
+        nextImage.width = 20;
+        nextImage.height = 20;
+        nextImage.style.paddingBottom = "3px";
+        nextButton.appendChild(nextImage);
+      }
+
+      function nextPage() {
+        start++;
+        //console.log(start);
+        if (start > 36) {
+          start--;
+          var cityPrompt = prompt(
+            "We can not Predict the Weather precisely that far in the Future.",
+            "Harare"
+          );
+          if (cityPrompt == null || cityPrompt == "") {
+          } else {
+            document.getElementById("cityInput").value = cityPrompt;
+            loadWeather();
+            return;
+          }
+        }
+        loadWeather();
+      }
+
+      function previousPage() {
+        start--;
+        if (start < 0) {
+          start++;
+          var cityPrompt = prompt(
+            "Who cares about Snows of Yesteryear? Would you like to Search for another City?:",
+            "Paris"
+          );
+          if (cityPrompt == null || cityPrompt == "") {
+          } else {
+            document.getElementById("cityInput").value = cityPrompt;
+            loadWeather();
+            return;
+          }
+        }
+        loadWeather();
+      }
+
+      function keyPress(event) {
+        if (event.key === "Enter") {
+          loadWeather();
+        }
+      }
+
+      function printDay() {
+        var currentDay = new Date();
+        var day;
+        switch (currentDay.getDay()) {
+          case 0:
+            day = "Sunday";
+            break;
+          case 1:
+            day = "Monday";
+            break;
+          case 2:
+            day = "Tuesday";
+            break;
+          case 3:
+            day = "Wednsday";
+            break;
+          case 4:
+            day = "Thursday";
+            break;
+          case 5:
+            day = "Friday";
+            break;
+          case 6:
+            day = "Saturday";
+            break;
+        }
+        document.getElementById("showDay").innerHTML = day;
+      }
+
+      function getCurrentTime() {
+        var currentTime = new Date();
+        var newElement = document.createElement("span");
+        var showTime = document.getElementById("showTime");
+        if (showTime.children.length != 0) {
+          showTime.removeChild(showTime.childNodes[0]);
+        }
+        var secondsPrint;
+        var minutesPrint;
+        var hoursPrint;
+
+        if (currentTime.getSeconds() < 10) {
+          secondsPrint = ":0" + currentTime.getSeconds();
+        } else {
+          secondsPrint = ":" + currentTime.getSeconds();
+        }
+        if (currentTime.getMinutes() < 10) {
+          minutesPrint = ":0" + currentTime.getMinutes();
+        } else {
+          minutesPrint = ":" + currentTime.getMinutes();
+        }
+        if (currentTime.getHours() < 10) {
+          hoursPrint = "0" + currentTime.getHours();
+        } else {
+          hoursPrint = currentTime.getHours();
+        }
+        newElement.innerHTML = hoursPrint + minutesPrint + secondsPrint;
+        showTime.appendChild(newElement);
+      }
+
+      function printDate() {
+        var date = new Date();
+        var day = date.getDate();
+        var month = date.getMonth() + 1;
+        var year = date.getFullYear();
+        if (day < 10) {
+          day = "0" + day;
+        }
+        if (month < 10) {
+          month = "0" + month;
+        }
+        document.getElementById("showDate").innerHTML =
+          day + "." + month + "." + year;
+      }
+
+      function refreshClock() {
+        setInterval(getCurrentTime, 1000);
+        setInterval(refreshDay, 1000 * 60);
+      }
+
+      function refreshDay() {
+        var currentHour = new Date().getHours();
+        if (currentHour == 0) {
+          printDay();
+          printDate();
+        }
+      }
+
+      function printDegree(response) {
+        var parent = document.getElementById("degree");
+        while (parent.hasChildNodes()) {
+          parent.removeChild(parent.lastChild);
+        }
+        var counter;
+        for (counter = start; counter < start + 4; counter++) {
+          if (counter == 0) {
+            console.log(response);
+          }
+          var card = document.createElement("div");
+          var cityContainer = document.createElement("span");
+          var clockContainer = document.createElement("div");
+          var degreeContainer = document.createElement("div");
+          var humidityContainer = document.createElement("div");
+          var windContainer = document.createElement("div");
+          var weatherIcon = document.createElement("img");
+
+          var degree = response.list[counter].main.temp;
+          var roundedValueMainTemp = roundFunction(degree);
+
+          cityContainer.innerHTML =
+            response.city.name + " (" + response.city.country + ")";
+          clockContainer.innerHTML = response.list[counter].dt_txt;
+          clockContainer.innerHTML =
+            clockContainer.innerHTML.slice(8, 10) +
+            "." +
+            clockContainer.innerHTML.slice(5, 7) +
+            " " +
+            clockContainer.innerHTML.slice(11, 16) +
+            " Uhr";
+          degreeContainer.innerHTML = roundedValueMainTemp + "°C";
+          humidityContainer.innerHTML =
+            "Humidity: " + response.list[counter].main.humidity + "%";
+          windContainer.innerHTML =
+            "Wind Speed: " + response.list[counter].wind.speed + "m/s";
+          weatherIcon.src =
+            "http://openweathermap.org/img/w/" +
+            response.list[counter].weather["0"].icon +
+            ".png";
+          weatherIcon.style.maxHeight = "50px";
+          weatherIcon.style.maxWidth = "50px";
+
+          assignClassNames(
+            card,
+            cityContainer,
+            clockContainer,
+            degreeContainer,
+            humidityContainer,
+            parent,
+            weatherIcon,
+            windContainer
+          );
+          constructCard(
+            card,
+            cityContainer,
+            clockContainer,
+            degreeContainer,
+            humidityContainer,
+            parent,
+            weatherIcon,
+            windContainer
+          );
+        }
+      }
+
+      function assignClassNames(
+        card,
+        cityContainer,
+        clockContainer,
+        degreeContainer,
+        humidityContainer,
+        parent,
+        weatherIcon,
+        windContainer
+      ) {
+        cityContainer.className = "digitalStyle";
+        clockContainer.className = "digitalStyle uk-text-meta small";
+        degreeContainer.className = "digitalStyle";
+        humidityContainer.className = "digitalStyle uk-text-meta small";
+        windContainer.className = "digitalStyle uk-text-meta small";
+        card.className = "uk-card uk-margin-right uk-card-default uk-padding";
+      }
+
+      function constructCard(
+        card,
+        cityContainer,
+        clockContainer,
+        degreeContainer,
+        humidityContainer,
+        parent,
+        weatherIcon,
+        windContainer
+      ) {
+        card.appendChild(cityContainer);
+        card.appendChild(clockContainer);
+        card.appendChild(degreeContainer);
+        card.appendChild(humidityContainer);
+        card.appendChild(windContainer);
+        card.appendChild(weatherIcon);
+        parent.appendChild(card);
+      }
+
+      function roundFunction(degree) {
+        //°F to °C
+        /*degree = degree - 32;
+            degree = degree / 18000;*/
+
+        //°K to °C
+        degree = degree - 273.15;
+
+        //round
+        degree = degree * 10;
+        degree = Math.round(degree);
+        degree = degree / 10;
+
+        return degree;
+      }
+
+      function resetStart() {
+        start = 0;
+        document.getElementById("cityInput").value = "";
+      }
+      function waringControl() {
+        var warningMessage = document.createElement("div");
+        var warningContainer = document.getElementById("warning");
+        while (warningContainer.hasChildNodes()) {
+          warningContainer.removeChild(warningContainer.lastChild);
+        }
+
+        warningMessage.innerHTML = "City not found.";
+        warningMessage.className =
+          "uk-card uk-margin-right uk-card-default uk-padding uk-first-column uk-text-danger uk-text-center";
+        warningMessage.style.textAlign = "center";
+
+        warningContainer.appendChild(warningMessage);
+        return;
+      }
+
+      function loadWeather() {
+        var waringMessageRemove = document.getElementById("warning");
+        if (waringMessageRemove.hasChildNodes() == true) {
+          waringMessageRemove.removeChild(waringMessageRemove.lastChild);
+        }
+
+        document.getElementById("loading").innerHTML = "Loading ...";
+        var inputValueCity;
+        inputValueCity = document.getElementById("cityInput").value;
+
+        if (inputValueCity == "") {
+          inputValueCity = "Saarbrücken";
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.open(
+          "GET",
+          "http://api.openweathermap.org/data/2.5/forecast?q=" +
+            inputValueCity +
+            "&id=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          true
+        );
+        //Die ID um die API richtig abrufen zu können wurde gehashed
+        xhr.onload = function () {
+          console.log("Nachricht erhalten!");
+          if (xhr.status >= 200 && xhr.status < 300) {
+            var response = JSON.parse(xhr.responseText);
+            //console.log(response);
+            //console.log(xhr.status);
+          } else {
+            console.warn(xhr.statusText, xhr.responseText);
+          }
+          if (xhr.status == 404) {
+            waringControl();
+          }
+          document.getElementById("loading").innerHTML = "";
+          printDegree(response);
+        };
+
+        xhr.send();
+        console.log("Nachricht versand!");
+      }
+    </script>
+  </body>
+</html>
